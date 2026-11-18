@@ -1,0 +1,184 @@
+/* date select */
+
+.f-date-select {
+    width: fit-content;
+}
+
+.f-date-select__date {
+    justify-content: stretch;
+    align-content: stretch;
+    align-items: stretch;
+    height: 301px;
+    border-bottom: 1px solid var(--f-color-border);
+    width: 100%;
+}
+
+.f-date-select__date-picker {
+    width: 280px;
+    height: 300px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--f-color-border);
+    border-right: 1px solid var(--f-color-border);
+}
+
+.f-date-select__month {
+    font-weight: var(--f-font-weight-semibold);
+    width: 100%;
+    display: block;
+    text-transform: uppercase;
+    color: var(--f-color-text);
+}
+
+.f-date-select__weekday {
+    color: var(--f-color-text-weaker);
+    text-align: center;
+    flex: 1;
+}
+
+.f-date-select__footer {
+    padding: 1rem;
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+.f-date-select__time {
+    padding: 1rem;
+    height: 100%;
+    flex-grow: 1;
+    gap: 1rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.f-date-select__presets {
+    gap: 0.9rem;
+    overflow-y: scroll;
+    width: 150px;
+    height: 100%;
+    align-items: flex-end;
+    align-content: flex-start;
+    justify-content: flex-start;
+    padding: 1rem;
+}
+
+/* label */
+
+:root {
+    --f-common-label-height: var(--task-button-height);
+    --f-common-label-padding: 0 0.25rem;
+    --f-common-label-font-size: var(--f-font-size-sm);
+}
+
+[data-theme='dark'] .f-label {
+    color: var(--f-label-color);
+
+    outline: 1px solid rgb(from var(--f-label-color) r g b / 12.5%);
+    outline-offset: -1px;
+
+    background: linear-gradient(
+        to bottom right,
+        rgba(from var(--f-label-color) r g b / 30%),
+        rgba(from var(--f-label-color) r g b / 15%)
+    );
+}
+
+[data-theme='light'] .f-label {
+    color: var(--f-label-color);
+    /* color: var(--f-color-white); */
+
+    outline: 1px solid rgb(from var(--f-label-color) r g b / 7.5%);
+    /* outline: 1px solid rgb(from var(--f-label-color) r g b / 75%); */
+    outline-offset: -1px;
+
+    background: linear-gradient(
+        to bottom right,
+        rgba(from var(--f-label-color) r g b / 5%),
+        rgba(from var(--f-label-color) r g b / 15%)
+    );
+    /* background: linear-gradient(
+        to bottom right,
+        rgba(from var(--f-label-color) r g b / 75%),
+        rgba(from var(--f-label-color) r g b / 85%)
+    ); */
+}
+
+.f-label {
+    height: var(--f-common-label-height) !important;
+    border-radius: var(--f-radius);
+    padding: var(--f-common-label-padding);
+    /* box-shadow: var(--f-shadow-sm); */
+}
+
+.f-label-button {
+    gap: 0.2rem;
+}
+
+.f-label.is-double {
+    padding: 0 0.15rem 0 0rem;
+    display: flex !important;
+}
+
+@media only screen and (max-width: 600px) {
+    .f-label {
+        max-width: 70px;
+    }
+}
+
+.f-label:focus {
+    outline: none;
+}
+
+.f-label > span {
+    color: inherit;
+    font-weight: var(--f-font-weight-medium);
+    font-size: var(--f-common-label-font-size) !important;
+    padding: var(--f-common-label-padding) !important;
+}
+
+.f-label .f-label__first {
+    padding: 0 0.5rem !important;
+    margin: 0 !important;
+    margin-left: 1px !important;
+    height: calc(var(--f-common-label-height) - 2px) !important;
+    display: block !important;
+    border-top-left-radius: var(--f-radius);
+    border-bottom-left-radius: var(--f-radius);
+    position: relative;
+}
+
+.f-label .f-label__second {
+    padding: 0 0.5rem !important;
+    display: block !important;
+}
+
+.label-option-component {
+    cursor: pointer;
+}
+
+.label-option-component:hover {
+    background: var(--f-color-surface-strong);
+}
+
+/* misc */
+
+.f-drag-element,
+.f-drag-area__element {
+    z-index: auto !important;
+}
+
+.label-select-x {
+    --c: currentColor;
+
+    background-color: transparent;
+    transition: background-color 0.2s;
+    width: 1.5rem;
+    height: 1.5rem;
+    position: relative;
+    right: -2px;
+    border-radius: var(--f-radius-full);
+    color: rgba(from var(--c) r g b / 75%);
+}
+
+.label-select-x:hover {
+    background-color: rgba(from var(--f-color-surface) r g b / 25%);
+}

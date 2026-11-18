@@ -1,0 +1,511 @@
+/* Blot application surfaces. The shared UI library remains unchanged. */
+html,
+body,
+#root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+.nav {
+    --nav-window-controls-height: 28px;
+    position: relative;
+    padding-top: var(--nav-window-controls-height);
+}
+.nav-resizable {
+    margin-top: calc(0px - var(--nav-window-controls-height));
+}
+.nav-resizable > .f-resizable-rail {
+    -webkit-app-region: no-drag;
+}
+.nav,
+.note-list-pane {
+    -webkit-user-select: none;
+    user-select: none;
+}
+.nav input,
+.note-list-pane input {
+    -webkit-user-select: text;
+    user-select: text;
+}
+.nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 80px;
+    right: 0;
+    height: var(--nav-window-controls-height);
+    -webkit-app-region: drag;
+}
+.minimize-header,
+.note-editor-toolbar {
+    -webkit-app-region: drag;
+}
+.minimize-header .f-button,
+.note-editor-toolbar .f-button,
+.note-editor-toolbar .f-toggle {
+    -webkit-app-region: no-drag;
+}
+.f-main,
+.frame,
+.note-editor-pane {
+    min-width: 0;
+    min-height: 0;
+}
+.notes-frame {
+    width: 100%;
+    min-width: 0;
+}
+.note-list-pane {
+    border-right: 1px solid var(--f-color-border);
+    min-height: 0;
+    max-width: 40%;
+}
+.note-list-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    width: 100%;
+    padding-bottom: 20px;
+}
+.note-list-item {
+    padding: 1rem;
+    margin-bottom: 4px;
+}
+.note-list-drag-item + .note-list-drag-item {
+    margin-top: 0.1rem;
+}
+.note-drag-ghost {
+    width: max-content;
+    max-width: min(300px, 70vw);
+    padding: 0.6rem 0.85rem;
+    color: var(--f-color-text);
+    box-shadow: var(--f-shadow-lg);
+}
+.note-drag-ghost .f-text {
+    display: block;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.note-list-item .clamp-text-two {
+    line-height: 1.55;
+}
+.note-list-tags {
+    min-width: 0;
+    overflow: hidden;
+}
+.note-list-tag {
+    min-width: 0;
+    max-width: 100px;
+    flex-shrink: 1;
+}
+.note-list-item.is-open {
+    background: var(--f-color-surface-strong);
+}
+.note-checklist-progress {
+    margin-top: 4px;
+    --f-progress-background: var(--f-color-border);
+}
+.note-checklist-progress > div {
+    transition: width 0.25s;
+}
+.note-image-preview {
+    overflow: hidden;
+}
+.note-image-preview img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: var(--f-radius-sm);
+    background: var(--f-color-surface-strong);
+    flex-shrink: 0;
+}
+.blot-editor .tiptap img {
+    display: block;
+    margin: 1em 0;
+    border-radius: var(--f-radius-sm);
+    outline: 2px solid transparent;
+}
+.blot-editor .tiptap img.ProseMirror-selectednode {
+    outline-color: var(--f-color-accent);
+}
+.note-scroll {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.note-page {
+    --note-font-scale: 1;
+    --note-font-size: calc(17px * var(--note-font-scale));
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px clamp(28px, 4vw, 64px) 80px;
+}
+.note-page input.note-title.f-input {
+    font-size: calc(clamp(28px, 2.5vw, 34px) * var(--note-font-scale));
+    font-weight: 650;
+    line-height: 1.35;
+    height: 1.6em;
+    background: transparent;
+    letter-spacing: -0.025em !important;
+}
+.note-title.f-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+.note-title.f-input::placeholder {
+    color: var(--f-color-text-weakest);
+}
+.note-status {
+    opacity: 0.8;
+}
+.blot-editor {
+    margin-top: 24px;
+    position: relative;
+}
+.blot-editor .tiptap-editor {
+    padding: 0;
+    background: transparent;
+}
+.blot-editor .tiptap {
+    padding: 4px 0 40vh;
+    min-height: 50vh;
+    font-size: var(--note-font-size, 17px);
+    line-height: 1.8;
+    color: var(--f-color-text);
+    outline: none;
+    overflow-wrap: anywhere;
+}
+.blot-editor .tiptap > * {
+    max-width: 100%;
+}
+.blot-editor .tiptap p {
+    margin: 0 0 1em;
+    line-height: inherit;
+}
+.blot-editor .tiptap h1 {
+    font-size: 1.7em;
+}
+.blot-editor .tiptap h2 {
+    font-size: 1.4em;
+}
+.blot-editor .tiptap h3 {
+    font-size: 1.15em;
+}
+.blot-editor .tiptap h1,
+.blot-editor .tiptap h2,
+.blot-editor .tiptap h3 {
+    margin: 1.7em 0 0.6em;
+    line-height: 1.35;
+    font-weight: 650;
+}
+.blot-editor .tiptap > :first-child {
+    margin-top: 0;
+}
+.blot-editor .tiptap ul,
+.blot-editor .tiptap ol {
+    padding-left: 1.5em;
+    margin: 0 0 1em;
+}
+.blot-editor .tiptap li ul,
+.blot-editor .tiptap li ol {
+    margin: 0;
+}
+.blot-editor .tiptap li p {
+    margin: 0.2em 0;
+}
+.blot-editor .tiptap blockquote {
+    border-left: 3px solid var(--f-color-accent);
+    padding: 4px 0 4px 20px;
+    margin: 1.2em 0;
+    color: var(--f-color-text-weaker);
+    background: transparent;
+}
+.blot-editor .tiptap blockquote p:last-child {
+    margin-bottom: 0;
+}
+.blot-editor .tiptap code {
+    font-family: var(--f-font-mono);
+    font-size: 0.85em;
+    border-radius: 4px;
+    background: var(--f-color-surface-strong);
+    padding: 0.15em 0.35em;
+}
+.blot-editor .tiptap pre {
+    font-size: inherit;
+    padding: 20px;
+    margin: 1.2em 0;
+    background: var(--f-color-surface-strong);
+    border: 1px solid var(--f-color-border);
+    border-radius: 8px;
+    overflow-x: auto;
+    white-space: pre;
+}
+.blot-editor .tiptap pre code {
+    background: none;
+    padding: 0;
+    color: var(--f-color-text);
+    font-size: 0.765em;
+}
+.blot-editor .tiptap a {
+    color: var(--f-color-accent);
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.blot-editor .tiptap mark {
+    background: #f0d99070;
+    color: inherit;
+    border-radius: 2px;
+}
+.blot-editor .tiptap ul[data-type='taskList'] {
+    padding: 0;
+    list-style: none;
+}
+.blot-editor .tiptap ul[data-type='taskList'] > li {
+    display: flex;
+    gap: 0.6em;
+    align-items: flex-start;
+    padding: 0.2em 0 0;
+    line-height: 1.55;
+}
+.blot-editor .tiptap ul[data-type='taskList'] > li > label {
+    flex: 0 0 auto;
+    padding: 0;
+    margin-top: 0.275em;
+    user-select: none;
+}
+.blot-editor .tiptap ul[data-type='taskList'] > li > div {
+    flex: 1;
+    min-width: 0;
+}
+.blot-editor .tiptap ul[data-type='taskList'] > li > div > p {
+    margin: 0;
+}
+.task-due-date {
+    max-width: 45%;
+    margin-top: 0.2em;
+    padding: 0 0.25em;
+    border: 0;
+    background: transparent;
+    color: var(--f-color-text-weaker);
+    font: inherit;
+    font-size: var(--f-font-size-xs);
+    cursor: pointer;
+}
+li:not([data-due-date]) > .task-due-date {
+    opacity: 0;
+}
+li:hover:not(:has(li:hover)) > .task-due-date:enabled,
+li > .task-due-date:focus-visible {
+    opacity: 1;
+}
+.blot-editor .tiptap input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--f-color-accent);
+    cursor: pointer;
+}
+.blot-editor .tiptap li[data-checked='true'] > div > p {
+    text-decoration: line-through;
+    color: var(--f-color-text-weakest);
+}
+.blot-editor .tiptap p.is-editor-empty:first-child::before {
+    color: var(--f-color-text-weakest);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+.editor-format-control {
+    position: absolute;
+    right: -8px;
+    top: -54px;
+}
+.bubble-menu {
+    background: var(--f-color-surface);
+    border: 1px solid var(--f-color-border);
+    border-radius: 9px;
+    box-shadow: var(--f-shadow-lg);
+}
+.blot-editor .tiptap-menubar,
+.bubble-menu .tiptap-menubar {
+    background: none;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+}
+.format-menu-item .f-button__label {
+    justify-content: flex-start;
+    width: 100%;
+}
+.link-dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #0003;
+    display: grid;
+    place-items: center;
+}
+.link-dialog {
+    width: 380px;
+    max-width: 90vw;
+}
+
+.startup-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+    height: 100%;
+    padding: 32px;
+    text-align: center;
+    line-height: 1.6;
+}
+.startup-error-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 420px;
+}
+.clamp-text-one,
+.clamp-text-two {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.clamp-text-one {
+    -webkit-line-clamp: 1;
+}
+.clamp-text-two {
+    -webkit-line-clamp: 2;
+}
+@media (max-width: 1050px) {
+    .note-page {
+        padding: 24px 28px 60px;
+    }
+    .note-list-pane {
+        max-width: 32%;
+    }
+}
+
+/* Keep row tools available to keyboard users while revealing them on hover. */
+.reveal-on-hover .reveal-on-hover-target,
+.reveal-on-hover .reveal-to-hover-target {
+    opacity: 0;
+    pointer-events: none;
+}
+.reveal-on-hover:hover .reveal-on-hover-target,
+.reveal-on-hover:focus-within .reveal-on-hover-target,
+.reveal-on-hover:hover .reveal-to-hover-target,
+.reveal-on-hover:focus-within .reveal-to-hover-target {
+    opacity: 1;
+    pointer-events: auto;
+}
+.nav__item-tools > .f-text {
+    min-width: 1ch;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.blot-editor .inline-hashtag {
+    color: var(--hashtag-color, var(--f-color-accent));
+    background: color-mix(in srgb, var(--hashtag-color, var(--f-color-accent)) 10%, transparent);
+    border-radius: var(--f-radius-2xs);
+    box-decoration-break: clone;
+    font-weight: var(--f-font-weight-semibold);
+    -webkit-box-decoration-break: clone;
+}
+
+.drawing-modal {
+    --f-modal-body-padding: 0;
+    --f-modal-footer-background: transparent;
+    overflow: hidden;
+}
+
+.drawing-modal .f-modal__body {
+    display: grid;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    place-items: center;
+    min-height: 0;
+    background: var(--f-color-surface-strong);
+}
+
+.drawing-modal canvas {
+    max-width: 100%;
+    max-height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.drawing-modal .f-modal__footer {
+    position: absolute;
+    inset: auto 0 0;
+    border-top: 0;
+    pointer-events: none;
+}
+
+.drawing-modal .f-modal__footer button {
+    pointer-events: auto;
+}
+
+/* Settings modal. */
+.settings-modal {
+    --f-tab-ix-spacing: 0.75rem;
+    --f-tabs-tab-height: 2.35rem;
+    --f-tabs-tab-color: var(--f-color-text-weak);
+    --f-tabs-tab-active: var(--f-color-text);
+    --f-tabs-tab-color-active: var(--f-color-text);
+    --f-tabs-tab-list-background: var(--f-color-surface-strong);
+    --f-tabs-tab-background-hover: var(--f-color-surface-stronger);
+    --f-tabs-tab-background-active: var(--f-color-surface-strongest);
+    --f-tabs-panel-padding: 2rem 3rem;
+    --f-modal-body-padding: 0;
+    max-height: 90%;
+    background: var(--f-color-surface);
+}
+
+.settings-modal .settings-panel {
+    padding: var(--f-tabs-panel-padding);
+    inset: 0;
+    position: absolute;
+    z-index: 0;
+}
+
+.settings-modal .settings-panel > * + * {
+    margin-top: 1.5rem;
+}
+
+.settings-modal .f-tab-list {
+    width: 225px;
+    padding: 0 1rem;
+    border-top-left-radius: var(--f-modal-border-radius);
+    border-bottom-left-radius: var(--f-modal-border-radius);
+}
+
+.settings-modal .f-tab-list .f-heading {
+    padding: 1.5rem 0 1rem 0.9rem;
+    font-size: 12px !important;
+    font-weight: var(--f-font-weight-semibold);
+    color: var(--f-color-text-weaker);
+}
+
+.settings-modal .f-tab__active {
+    display: none !important;
+}
+
+.settings-modal .f-tab {
+    border-radius: var(--f-nav-item-radius);
+    transition: background 0.25s;
+}
+
+.settings-modal .f-tab.is-selected {
+    background: var(--f-color-surface-stronger);
+    font-weight: var(--f-font-weight-semibold);
+}
+
+.settings-modal .f-tab-panels {
+    min-width: 0;
+}

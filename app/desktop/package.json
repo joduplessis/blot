@@ -1,0 +1,66 @@
+{
+    "name": "blot-desktop",
+    "productName": "Blot",
+    "version": "0.1.0",
+    "license": "MIT",
+    "private": true,
+    "description": "Local notes with nested tags",
+    "homepage": "https://blot.page",
+    "main": "main.cjs",
+    "scripts": {
+        "build": "node build.mjs",
+        "typecheck": "tsc --noEmit -p tsconfig.json",
+        "dev": "BLOT_DEV=1 electron .",
+        "start": "electron .",
+        "pack:mac": "electron-builder --mac --dir",
+        "pack:win": "electron-builder --win --dir",
+        "pack:linux": "electron-builder --linux --dir"
+    },
+    "devDependencies": {
+        "electron": "^44.4.5",
+        "electron-builder": "^26.15.3",
+        "@types/node": "^24.0.0",
+        "typescript": "^5.0.2"
+    },
+    "build": {
+        "appId": "app.noted.desktop",
+        "productName": "Blot",
+        "files": [
+            "main.cjs",
+            "preload.cjs",
+            "dist/**/*"
+        ],
+        "directories": {
+            "buildResources": "build",
+            "output": "release"
+        },
+        "mac": {
+            "category": "public.app-category.productivity",
+            "target": "dmg",
+            "identity": "-",
+            "entitlements": "build/entitlements.mac.plist",
+            "entitlementsInherit": "build/entitlements.mac.plist",
+            "icon": "build/icon.png"
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "build/icon.png"
+        },
+        "linux": {
+            "category": "Office",
+            "target": "AppImage",
+            "icon": "build/icon.png"
+        },
+        "extraResources": [
+            {
+                "from": "../../LICENSE",
+                "to": "Blot-LICENSE.txt"
+            },
+            {
+                "from": "../dist",
+                "to": "renderer"
+            }
+        ]
+    },
+    "author": "Blot"
+}

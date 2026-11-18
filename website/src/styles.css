@@ -1,0 +1,234 @@
+@import '../../app/src/fonts/Inter/inter.css';
+@import '@fold-ui/core/dist/styles.css';
+@import '@fold-ui/design/tokens.css';
+@import '@fold-ui/design/tokens-light.css';
+
+html[data-theme='light'] {
+    scroll-behavior: smooth;
+    scroll-padding-top: 40px;
+    font-size: 15px;
+    background: var(--f-color-surface);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--f-color-text);
+    background: var(--f-color-surface);
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+a:hover {
+    color: var(--f-color-text-weak);
+}
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--f-color-accent);
+    outline-offset: 5px;
+}
+::selection {
+    background: var(--f-color-highlight-weak);
+}
+
+#root {
+    isolation: isolate;
+}
+.bubbles {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+.bubble {
+    position: absolute;
+    top: 100%;
+    cursor: pointer;
+    opacity: 0.2;
+    animation: bubble-rise linear infinite;
+}
+.bubble::before {
+    content: '';
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--f-color-text);
+    border-radius: 50%;
+}
+.bubble::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    pointer-events: auto;
+}
+.bubble.is-popped {
+    opacity: 0.5;
+}
+.bubble.is-popped::before {
+    animation: bubble-pop 220ms ease-out forwards;
+}
+.bubble.is-popped::after {
+    inset: calc(50% - 1px) auto auto calc(50% - 1px);
+    width: 2px;
+    height: 2px;
+    color: var(--f-color-text);
+    box-shadow: -7px -5px, 5px -8px, 8px 4px, -4px 8px;
+    pointer-events: none;
+    animation: bubble-droplets 350ms ease-out forwards;
+}
+@keyframes bubble-rise {
+    to {
+        transform: translate(var(--drift), calc(-100vh - 100%));
+    }
+}
+@keyframes bubble-pop {
+    to {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+}
+@keyframes bubble-droplets {
+    from {
+        transform: scale(0.5);
+    }
+    to {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Keep foreground content above the bubbles and leave the gaps between elements interactive. */
+main :is(.f-heading, .f-text, .app-icon, .hero-art, figcaption, a),
+.site-footer :is(.f-text, a) {
+    position: relative;
+}
+
+.shell {
+    width: min(1040px, calc(100% - 48px));
+    margin-inline: auto;
+}
+.app-icon {
+    display: block;
+    border-radius: 23%;
+}
+.hero-icon {
+    box-shadow: 0 8px 20px #5022a51a;
+    margin-bottom: 4px;
+}
+.intro {
+    padding-block: 64px 60px;
+    text-align: center;
+}
+.intro-description {
+    max-width: 570px;
+    text-wrap: balance;
+}
+
+.product {
+    width: min(1240px, calc(100% - 48px));
+    margin: 0 auto;
+}
+.hero-art {
+    overflow: hidden;
+    border-radius: 28px;
+    padding: clamp(32px, 7.5vw, 96px);
+    background: #17112e url('/hero-gradient.webp') center / cover no-repeat;
+}
+.app-screenshot {
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px -20px #080612b3;
+}
+.app-screenshot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: inherit;
+    outline: 1px solid #16151b;
+    outline-offset: -1px;
+}
+.product figcaption {
+    text-align: center;
+    font-size: 12px;
+    color: var(--f-color-text-weak);
+    margin-top: 24px;
+}
+
+.features {
+    max-width: 920px;
+    padding-block: 112px;
+}
+.feature-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px 80px;
+    margin-top: 64px;
+}
+.site-footer {
+    min-height: 100px;
+    border-top: 1px solid var(--f-color-border);
+    font-size: 12px;
+    color: var(--f-color-text-weak);
+}
+.skip-link {
+    position: fixed;
+    left: 20px;
+    top: -80px;
+    padding: 12px 20px;
+    background: var(--f-color-surface);
+    border-radius: 8px;
+    z-index: 10;
+}
+.skip-link:focus {
+    top: 20px;
+}
+
+@media (max-width: 600px) {
+    .bubble:nth-child(even) {
+        display: none;
+    }
+    .intro {
+        padding-block: 44px;
+    }
+    .hero-icon {
+        width: 64px;
+        height: 64px;
+    }
+    .product {
+        width: calc(100% - 24px);
+    }
+    .hero-art {
+        padding: 40px 20px;
+        border-radius: 20px;
+    }
+    .app-screenshot {
+        border-radius: 5px;
+    }
+    .features {
+        padding-block: 72px;
+    }
+    .feature-list {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        margin-top: 40px;
+    }
+    .site-footer {
+        flex-direction: column;
+        justify-content: center !important;
+        padding-block: 28px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .bubbles {
+        display: none;
+    }
+    html[data-theme='light'] {
+        scroll-behavior: auto;
+    }
+}

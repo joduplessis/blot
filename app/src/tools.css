@@ -1,0 +1,406 @@
+[data-theme='light'] {
+    --f-color-main-icon: var(--f-color-base-600);
+
+    --f-color-nav-item-text-active: var(--f-color-base-800);
+    --f-color-nav-item-text-inactive: var(--f-color-base-550);
+
+    --f-color-nav-item-bg-hover: rgba(from var(--f-color-base-200) r g b / 25%);
+    --f-color-nav-item-bg-active: rgba(from var(--f-color-base-200) r g b / 40%);
+    --f-color-nav-item-bg-pressed: rgba(from var(--f-color-base-200) r g b / 75%);
+
+    --f-color-toolbutton-bg-hover: var(--f-color-nav-item-bg-hover);
+
+    --frame-border: 1px solid var(--f-color-border);
+
+    --f-color-note-list-bg-hover: rgba(from var(--f-color-surface-strong) r g b / 50%);
+
+    --f-color-progress-circle-background: var(--f-color-base-100);
+    --f-color-progress-circle: var(--f-color-base-300);
+
+    --f-color-nav-item-icon: var(--f-color-base-400);
+
+    --f-color-view-border: var(--f-color-border);
+
+    --block-default: var(--f-color-surface-stronger);
+}
+
+[data-theme='dark'] {
+    --f-color-main-icon: var(--f-color-base-400);
+
+    --f-color-nav-item-text-active: var(--f-color-text);
+    --f-color-nav-item-text-inactive: var(--f-color-text-weak);
+
+    --f-color-nav-item-bg-hover: rgba(from var(--f-color-base-900) r g b / 75%);
+    --f-color-nav-item-bg-active: rgba(from var(--f-color-base-900) r g b / 50%);
+    --f-color-nav-item-bg-pressed: var(--f-color-base-850);
+
+    --f-color-toolbutton-bg-hover: var(--f-color-surface-strong);
+
+    --frame-border: 1px solid var(--f-color-border);
+
+    --f-color-note-list-bg-hover: rgba(from var(--f-color-surface-strong) r g b / 50%);
+
+    --f-color-progress-circle-background: var(--f-color-base-950);
+    --f-color-progress-circle: var(--f-color-base-700);
+
+    --f-color-nav-item-icon: var(--f-color-base-700);
+
+    --f-color-view-border: var(--f-color-border);
+
+    --block-default: var(--f-color-surface-stronger);
+}
+
+/* nav */
+
+.nav-header {
+    padding: var(--header-nav-padding);
+    height: var(--header-nav-height);
+    width: 100%;
+}
+
+.nav-heading {
+    letter-spacing: var(--letter-spacing) !important;
+    color: var(--f-color-text);
+}
+
+[data-theme='light'] .dock,
+[data-theme='light'] .nav {
+    --block-default: var(--f-color-base-200);
+}
+
+[data-theme='dark'] .dock,
+[data-theme='dark'] .nav {
+    --block-default: var(--f-color-base-800);
+}
+
+/* dock */
+
+.dock {
+    width: 4rem;
+    padding: 1.25rem 0 0.75rem 0;
+    gap: 0.75rem;
+    justify-content: flex-start;
+    background: transparent;
+    border-right: 1px solid var(--f-color-border);
+    position: relative;
+
+    --f-button-background-color-hover: var(--f-color-surface-stronger);
+    --f-image-background-color: var(--f-color-background);
+    --f-avatar-background-color: var(--f-color-surface-strongest);
+    --f-avatar-badge-outline: 0.2rem solid var(--f-color-background);
+}
+
+.dock.is-nav-hidden {
+    border-right: none;
+}
+
+.dock {
+    --f-button-color: var(--f-color-text-weak);
+    --f-button-color-hover: var(--f-color-accent);
+    --f-button-background-color-hover: var(--f-color-nav-item-bg-hover);
+    --f-button-active-background: var(--f-color-nav-item-bg-hover);
+}
+
+.dock .f-button.is-default:not(:disabled, .is-loading):active {
+    background-color: var(--f-button-active-background) !important;
+}
+
+.dock-buttons {
+    --f-button-color: var(--f-color-text-weak);
+    --f-button-color-hover: var(--f-color-accent);
+    --f-button-background-color-hover: var(--f-color-nav-item-bg-hover);
+    --f-button-active-background: var(--f-color-nav-item-bg-pressed);
+}
+
+.dock button svg * {
+    stroke-width: var(--f-icon-stroke-width-lg);
+}
+
+/* nav */
+
+.nav .f-scrollbar {
+    --f-scrollbar-foreground: var(--f-color-surface-stronger);
+
+    overflow-y: scroll;
+}
+
+.nav {
+    user-select: none;
+    background: transparent;
+
+    --f-drag-lined-size: 2px;
+    --f-drag-indent: 1.5rem;
+}
+
+.nav .f-avatar-group .f-avatar {
+    --f-image-background-color: var(--f-color-background);
+    --f-avatar-background-color: var(--block-default);
+    --nav-avatar-border-color: var(--f-color-surface-stronger);
+
+    border: 1px solid var(--f-color-background);
+}
+
+.nav .f-drag-area__placeholder {
+    background: transparent;
+    position: relative;
+}
+
+.nav .f-drag-area__placeholder::after {
+    border-radius: var(--f-nav-item-radius);
+    background: var(--f-color-nav-item-bg-pressed);
+    content: ' ';
+    position: absolute;
+    display: block;
+    height: 100%;
+    width: 100%;
+    left: 0px;
+    right: 0px;
+}
+
+.nav__section {
+    margin: 0 0 0.5rem 0;
+    width: 100%;
+}
+
+.nav__section-inner {
+    gap: 0.5rem;
+    width: 100%;
+    position: relative;
+    padding: 0.5rem 1rem 0.5rem 0.5rem;
+    color: var(--f-color-text-weaker);
+}
+
+.nav__items {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    padding: 0rem 0 2rem 0;
+    background: transparent;
+    position: relative;
+
+    --f-color-surface: var(--f-color-background);
+    --f-button-background-color-hover: var(--f-color-surface);
+}
+
+.nav__items-inner {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.nav__items-inner > :not(.nav-divider) {
+    padding: var(--nav-padding);
+}
+
+.nav__item {
+    z-index: 1;
+    padding: 0;
+    height: var(--nav-item-height);
+    width: calc(100% - 0.9rem);
+    position: relative;
+    justify-content: flex-start;
+    cursor: pointer !important;
+}
+
+.nav__item:focus {
+    cursor: pointer !important;
+}
+
+.f-drag-ghost .nav__item {
+    opacity: 0.5;
+}
+
+.f-drag-ghost .nav__item .f-badge {
+    display: none;
+}
+
+.nav__item .f-text {
+    transition: color 0.1s;
+}
+
+.nav__item .f-text.nav-item__text {
+    position: relative;
+    padding: 0;
+    width: 100%;
+    letter-spacing: var(--letter-spacing-strong);
+    font-weight: var(--f-font-weight-medium);
+    text-size-adjust: 100%;
+    color: var(--f-color-nav-item-text-inactive);
+}
+
+.nav__item:hover .nav-item__text {
+    color: var(--f-color-nav-item-text-active);
+}
+
+.nav__item .nav__item-outer {
+    width: 100%;
+    height: var(--nav-item-height);
+    top: 0.5px;
+    position: relative;
+    border-radius: var(--f-nav-item-radius);
+    justify-content: stretch;
+    padding-left: calc(var(--indent, 0) * var(--f-drag-indent));
+    transition: background-color 0.2s ease-out;
+}
+
+.windows .nav__item .nav__item-outer {
+    margin-right: 0.1rem;
+}
+
+.nav__item-tools {
+    gap: 0.5rem;
+    flex-shrink: 0;
+    padding-right: 0.9rem;
+}
+
+.nav__item-tools .f-badge {
+    position: relative;
+    right: 3px;
+    margin-left: 3px;
+}
+
+.nav__item .nav__item-outer.is-active {
+    background-color: var(--f-color-nav-item-bg-active);
+}
+
+.nav__item:hover .nav__item-outer:not(.is-active) {
+    background-color: var(--f-color-nav-item-bg-hover);
+}
+
+.nav__item:active:not(:has(.nav__item-tool-button:active)) .nav__item-outer:not(.is-active) {
+    background-color: var(--f-color-nav-item-bg-pressed);
+}
+
+.nav .f-button.is-subtle:hover {
+    background: var(--f-color-toolbutton-bg-hover);
+}
+
+.nav__item .nav__item-icon {
+    width: 30px;
+    margin-left: 0rem;
+    height: 100%;
+    position: relative;
+
+    --f-avatar-background-color: var(--block-default);
+}
+
+.nav__item.is-parent:hover .nav__item-icon > *:not(.nav__item-collapse-button) {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.nav__item .nav__item-text {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    top: 0px;
+    padding-left: 5px;
+    justify-content: flex-start;
+}
+
+.nav__item .nav__item-text .f-editable {
+    outline: none !important;
+    border-radius: 0;
+}
+
+.nav__item-tool-button {
+    border-radius: var(--f-radius-xs) !important;
+    padding: 0 !important;
+    border: none !important;
+    width: 20px !important;
+    height: 20px !important;
+
+    --f-button-background-color: transparent;
+    --f-button-border-color: var(--f-color-surface-strong);
+    --f-button-background-color-hover: var(--f-color-surface-stronger);
+    --f-button-active-background: var(--f-color-surface-strongest);
+}
+
+/* dark mode is fine */
+[data-theme='light'] .nav__item-tool-button {
+    --f-button-active-background: rgba(from var(--f-color-base-1000) r g b / 10%);
+    --f-button-background-color-hover: rgba(from var(--f-color-base-1000) r g b / 7.5%);
+}
+
+.nav__item-collapse-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    color: var(--f-color-text-weaker) !important;
+}
+
+.nav__item-collapse-button .f-icon {
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.nav__item-collapse-button:active .f-icon {
+    opacity: 0.9;
+}
+
+.nav-section-heading {
+    font-size: 0.95rem !important;
+    font-weight: var(--f-font-weight-semibold);
+    color: currentColor;
+    margin-left: -3px;
+}
+
+/* on background */
+
+.f-button.on-background {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+
+    --f-button-color-hover: var(--f-color-accent);
+    --f-button-background-color: transparent;
+    --f-button-background-color-hover: rgba(from var(--f-color-surface-stronger) r g b / 75%);
+    --f-button-active-background: var(--f-color-surface-stronger);
+}
+
+.f-button.is-active.on-background {
+    color: var(--f-color-accent);
+}
+
+/* nav general  */
+
+.nav-divider {
+    border-top: 1px solid var(--f-color-surface-stronger);
+    padding-top: 1rem;
+    margin-top: 1.25rem;
+    width: 100%;
+}
+
+.starred-container {
+    padding: 0.8rem 0 0.2rem 0;
+    color: var(--f-color-text-weaker);
+    width: 100%;
+    position: relative;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+}
+
+.starred-container:empty {
+    display: none;
+}
+
+/* subtle button */
+
+.f-button.subtle-button {
+    --f-button-background-color: transparent;
+    --f-button-background-color-hover: var(--f-color-surface-strong);
+    --f-button-active-background: var(--f-color-surface-stronger);
+
+    box-shadow: none;
+    border: none;
+}
+
+.nav .f-button.subtle-button {
+    --f-button-background-color: transparent;
+    --f-button-background-color-hover: rgba(from var(--f-color-surface-stronger) r g b / 50%);
+    --f-button-active-background: var(--f-color-surface-stronger);
+
+    border: none;
+    box-shadow: none;
+}
