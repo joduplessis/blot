@@ -1,8 +1,9 @@
 .f-calendar-schedule {
     width: 100%;
     min-height: 800px;
-    height: 100%;
+    flex: 1;
     position: relative;
+    z-index: 0;
     background: var(--f-color-surface);
     justify-content: flex-start;
 }
@@ -11,12 +12,12 @@
     width: 100%;
     flex: 1;
     flex-shrink: 0;
+    align-items: stretch;
 }
 
 .f-calendar-schedule-day {
     min-width: 0;
     flex: 1;
-    height: 100%;
     background: var(--f-color-surface);
     position: relative;
     border-left: 1px solid var(--f-color-border);
@@ -125,7 +126,6 @@
 .f-calendar-schedule-gutter {
     width: var(--f-calendar-schedule-gutter-width);
     background: var(--f-color-surface);
-    height: 100%;
     position: relative;
     border-bottom: 1px solid var(--f-color-border);
 }
@@ -419,13 +419,29 @@
     border-bottom: 1px solid var(--f-color-border);
 }
 .calendar-all-day {
-    flex-shrink: 0;
-    max-height: 32%;
+    max-height: 32cqh;
     overflow-y: auto;
 }
-.calendar-timeline {
+.calendar-scroll {
+    container-type: size;
     min-height: 0;
-    overflow-y: auto;
+    overflow: auto;
+    overflow-anchor: none;
+}
+.calendar-scroll.is-week .f-calendar-days__main {
+    flex-direction: row;
+}
+.calendar-scroll.is-week .f-calendar-days__row {
+    min-width: 0;
+}
+.calendar-scroll.is-week .calendar-heading-gutter,
+.calendar-scroll.is-week .f-calendar-schedule-gutter {
+    position: sticky;
+    left: 0;
+    z-index: 12;
+}
+.calendar-scroll.is-week .f-calendar-schedule-day {
+    z-index: 0;
 }
 .calendar-header button[data-event-id] {
     touch-action: none;

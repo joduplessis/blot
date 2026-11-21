@@ -30,7 +30,7 @@ const weekMatrix = (days: Date[], events: CalendarEvent[]) => {
     return rows
 }
 
-const CalendarDaysDay = ({ day, date, index, weekIndex, rows, noClamp, hideDateLabels, eventProps }) => {
+const CalendarDaysDay = ({ day, date, index, firstWeek, rows, noClamp, hideDateLabels, eventProps }) => {
     const [element, setElement] = useState<HTMLDivElement | null>(null)
     const titleRef = useRef<HTMLDivElement>(null)
     const dimensions = useResize(element)
@@ -42,7 +42,7 @@ const CalendarDaysDay = ({ day, date, index, weekIndex, rows, noClamp, hideDateL
     const overflow = !noClamp && rows.slice(limit).some((row) => row[index])
     const visible = noClamp || expanded ? rows : rows.slice(0, overflow ? Math.max(limit - 1, 0) : limit)
     const monthName =
-        day.getDate() === 1 || (weekIndex === 0 && index === 0) ? day.toLocaleString(undefined, { month: 'long' }) : ''
+        day.getDate() === 1 || (firstWeek && index === 0) ? day.toLocaleString(undefined, { month: 'long' }) : ''
     return (
         <div
             ref={setElement}
@@ -122,7 +122,7 @@ export const CalendarDays = ({ weeks, date, events, noClamp = false, hideDateLab
     return (
         <View
             className="f-calendar-days f-col can-update"
-            height={noClamp ? 'fit-content' : '100%'}>
+            height={noClamp ? 'fit-content' : '300%'}>
             <div className="f-calendar-days__main f-col">
                 {weeks.map((days, weekIndex) => (
                     <div
@@ -134,7 +134,7 @@ export const CalendarDays = ({ weeks, date, events, noClamp = false, hideDateLab
                                 day={day}
                                 date={date}
                                 index={index}
-                                weekIndex={weekIndex}
+                                firstWeek={weekIndex === weeks.length / 3}
                                 rows={matrix[weekIndex]}
                                 noClamp={noClamp}
                                 hideDateLabels={hideDateLabels}

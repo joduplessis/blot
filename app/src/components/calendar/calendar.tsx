@@ -1,6 +1,14 @@
 import { Button, ButtonGroup, Flexer, Heading, IconLib, Option, Options, Text, View } from '@fold-ui/core'
-import { addDays, addMonths, endOfDay, startOfDay, startOfMonth, startOfWeek } from 'date-fns'
-import { useMemo, useState } from 'react'
+import {
+    addDays,
+    addMonths,
+    differenceInCalendarWeeks,
+    endOfDay,
+    startOfDay,
+    startOfMonth,
+    startOfWeek,
+} from 'date-fns'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useAppStore } from '@/store/app'
 import { movedSchedule, scheduleOccurrences } from '@/helpers/task-schedule'
 import { NoteEditor } from '../note-editor'
@@ -8,6 +16,66 @@ import { CalendarDays } from './calendar-days'
 import { CalendarSchedule } from './calendar-schedule'
 import { useCalendarDrag, type CalendarEvent } from './calendar-event'
 import { AnchoredPopover } from '../common/anchored-popover'
+
+const useCalendarScroll = (date: Date, view: number, setDate: (date: Date) => void) => {
+    const scrollRef = useRef<HTMLDivElement>(null)
+    const position = useRef(1)
+    const pending = useRef<{ date: Date; position: number } | null>(null)
+    const month = view === 2
+    const pageWeeks = month ? 6 : 1
+    const weeks = useMemo(() => {
+        if (view === 0) return [[date]]
+
+        const first = addDays(startOfWeek(month ? startOfMonth(date) : date), -7 * pageWeeks)
+        return Array.from({ length: 3 * pageWeeks }, (_, week) =>
+            Array.from({ length: 7 }, (_, day) => addDays(first, week * 7 + day))
+        )
+    }, [date, view])
+
+    const pageSize = (element: HTMLDivElement) =>
+        month ? element.clientHeight : (element.scrollWidth - element.clientWidth) / 2
+
+    const handleScroll = () => {
+        const element = scrollRef.current
+        if (!view || !element || pending.current) return
+
+        const size = pageSize(element)
+        if (!size) return
+
+        const offset = month ? element.scrollTop : element.scrollLeft
+        position.current = Math.max(0, Math.min(2, offset / size))
+        const nextDate = month
+            ? startOfMonth(weeks[Math.floor((position.current + 0.5) * pageWeeks)][3])
+            : weeks[Math.round(position.current)][0]
+        const shift = differenceInCalendarWeeks(nextDate, month ? startOfMonth(date) : date)
+        if (!shift) return
+
+        // Recenter the date window without moving the dates on screen.
+        pending.current = { date: nextDate, position: position.current - shift / pageWeeks }
+        setDate(nextDate)
+    }
+
+    useLayoutEffect(() => {
+        const element = scrollRef.current
+        position.current = pending.current?.date === date ? pending.current.position : 1
+        pending.current = null
+        if (!view) return
+
+        const alignScroll = () => {
+            const offset = position.current * pageSize(element)
+            if (month) element.scrollTop = offset
+            else element.scrollLeft = offset
+        }
+
+        alignScroll()
+        const observer = new ResizeObserver(alignScroll)
+        observer.observe(element)
+
+        return () => observer.disconnect()
+    }, [date, view])
+
+    return { weeks, scrollRef, handleScroll }
+}
 
 export const Calendar = () => {
     const notes = useAppStore((state) => state.notes)
@@ -18,14 +86,8 @@ export const Calendar = () => {
     const [date, setDate] = useState(() => startOfDay(new Date()))
     const [view, setView] = useState(2)
     const month = view === 2
-    const days = useMemo(() => {
-        const first = month ? startOfWeek(startOfMonth(date)) : view === 1 ? startOfWeek(date) : date
-        return Array.from({ length: month ? 42 : view === 1 ? 7 : 1 }, (_, i) => addDays(first, i))
-    }, [date, view])
-    const weeks = useMemo(
-        () => (month ? Array.from({ length: 6 }, (_, i) => days.slice(i * 7, i * 7 + 7)) : [days]),
-        [days]
-    )
+    const { weeks, scrollRef, handleScroll } = useCalendarScroll(date, view, setDate)
+    const days = useMemo(() => weeks.flat(), [weeks])
     const events = useMemo(() => {
         const result: CalendarEvent[] = []
         for (const note of notes) {
@@ -74,7 +136,7 @@ export const Calendar = () => {
     const timedEvents = useMemo(() => (month ? [] : displayed.filter((event) => !event.wholeDay)), [displayed, month])
     const heading = date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
     const navigate = (direction: number) =>
-        setDate(month ? addMonths(date, direction) : addDays(date, direction * days.length))
+        setDate(month ? addMonths(date, direction) : addDays(date, direction * (view === 1 ? 7 : 1)))
     const eventProps = (event: CalendarEvent) => ({
         'type': 'button' as const,
         'title': event.title + (event.task.schedule.repeat ? ' (drag to move the repeating schedule)' : ''),
@@ -88,6 +150,26 @@ export const Calendar = () => {
             actions.select(event.noteId)
         },
     })
+
+    const weekdays = (
+        <View
+            row
+            width="100%"
+            shrink={0}
+            className="calendar-weekdays">
+            {(month ? weeks[0] : days).map((day) => (
+                <Text
+                    key={+day}
+                    flex={1}
+                    p="0.5rem"
+                    fontWeight="var(--f-font-weight-bold)"
+                    textAlign="center">
+                    {day.toLocaleDateString(undefined, { weekday: 'short' })} {!month && day.getDate()}
+                </Text>
+            ))}
+        </View>
+    )
+
     return (
         <View
             column
@@ -136,58 +218,67 @@ export const Calendar = () => {
                     <Option>Month</Option>
                 </Options>
             </View>
+            {month && weekdays}
             <View
-                row
-                width="100%"
-                shrink={0}
-                p={month ? 0 : '0 0 0 var(--f-calendar-schedule-gutter-width)'}
-                className="calendar-weekdays">
-                {(month ? days.slice(0, 7) : days).map((day) => (
-                    <Text
-                        key={+day}
-                        flex={1}
-                        p="0.5rem"
-                        fontWeight="var(--f-font-weight-bold)"
-                        textAlign="center">
-                        {day.toLocaleDateString(undefined, { weekday: 'short' })} {!month && day.getDate()}
-                    </Text>
-                ))}
-            </View>
-            {month ? (
-                <CalendarDays
-                    weeks={weeks}
-                    date={date}
-                    events={wholeDayEvents}
-                    eventProps={eventProps}
-                />
-            ) : (
-                <>
+                key={month ? 'month' : 'schedule'}
+                ref={scrollRef}
+                flex={1}
+                role="region"
+                aria-label={['Day calendar', 'Week calendar', 'Month calendar'][view]}
+                tabIndex={0}
+                onScroll={handleScroll}
+                className={'calendar-scroll f-scrollbar' + (view === 1 ? ' is-week' : '')}>
+                {month ? (
+                    <CalendarDays
+                        weeks={weeks}
+                        date={date}
+                        events={wholeDayEvents}
+                        eventProps={eventProps}
+                    />
+                ) : (
                     <View
-                        p="0 1px 0 var(--f-calendar-schedule-gutter-width)"
-                        width="100%"
-                        className="calendar-all-day">
-                        <CalendarDays
-                            noClamp
-                            hideDateLabels
-                            weeks={weeks}
-                            date={date}
-                            events={wholeDayEvents}
-                            eventProps={eventProps}
-                        />
-                    </View>
-                    <View
-                        width="100%"
-                        flex={1}
-                        position="relative"
-                        className="calendar-timeline f-scrollbar">
+                        column
+                        alignItems="stretch"
+                        justifyContent="flex-start"
+                        width={view === 1 ? 'calc(300% - 2 * var(--f-calendar-schedule-gutter-width))' : '100%'}
+                        style={{ minHeight: '100%' }}>
+                        <View
+                            row
+                            alignItems="stretch"
+                            position="sticky"
+                            zIndex={1}
+                            bgToken="surface"
+                            style={{ top: 0 }}>
+                            <View
+                                width="var(--f-calendar-schedule-gutter-width)"
+                                shrink={0}
+                                bgToken="surface"
+                                className="calendar-heading-gutter"
+                            />
+                            <View
+                                flex={1}
+                                style={{ minWidth: 0 }}>
+                                {weekdays}
+                                <View className="calendar-all-day">
+                                    <CalendarDays
+                                        noClamp
+                                        hideDateLabels
+                                        weeks={weeks}
+                                        date={date}
+                                        events={wholeDayEvents}
+                                        eventProps={eventProps}
+                                    />
+                                </View>
+                            </View>
+                        </View>
                         <CalendarSchedule
                             days={days}
                             events={timedEvents}
                             eventProps={eventProps}
                         />
                     </View>
-                </>
-            )}
+                )}
+            </View>
             {note && anchor && (
                 <AnchoredPopover
                     target={anchor}
