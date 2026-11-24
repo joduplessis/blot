@@ -18,6 +18,9 @@ import { useState } from 'react'
 import { useAppStore } from '@/store/app'
 import { PinModal } from './pin.modal'
 import { errorText } from '@/hooks/api.hooks'
+import { releaseDate, version } from '../../desktop/package.json'
+
+const released = new Date(releaseDate).toLocaleDateString(undefined, { dateStyle: 'long', timeZone: 'UTC' })
 
 export const SettingsModal = ({ onDismiss }: { onDismiss: () => void }) => {
     const pinSet = useAppStore((state) => state.privacy.pinSet)
@@ -128,6 +131,7 @@ export const SettingsModal = ({ onDismiss }: { onDismiss: () => void }) => {
                     <Tab prefix={<IconLib icon="cloud" />}>Sync</Tab>
                     <Tab prefix={<IconLib icon="markdown" />}>Import / Export</Tab>
                     <Tab prefix={<IconLib icon="lock" />}>Privacy</Tab>
+                    <Tab prefix={<IconLib icon="octopus" />}>About</Tab>
                 </TabList>
                 <TabPanels>
                     {/* The Settings heading occupies the first TabList slot. */}
@@ -361,6 +365,28 @@ export const SettingsModal = ({ onDismiss }: { onDismiss: () => void }) => {
                                 A short PIN provides basic privacy. Existing backups, exports and synced copies remain
                                 unchanged. Note titles and tag names remain visible. A forgotten PIN cannot be
                                 recovered.
+                            </Text>
+                        </View>
+                    </TabPanel>
+                    <TabPanel>
+                        <View className="f-overflow-y-auto f-scrollbar settings-panel">
+                            <Heading
+                                as="h4"
+                                m="1rem 0 1.5rem"
+                                fontWeight="var(--f-font-weight-bold)">
+                                About Blot
+                            </Heading>
+                            <View
+                                column
+                                gap="0.75rem"
+                                alignItems="flex-start">
+                                <Text fontWeight="var(--f-font-weight-semibold)">Version {version}</Text>
+                                <Text colorToken="text-weak">Released {released}</Text>
+                            </View>
+                            <Divider />
+                            <Text colorToken="text-weak">
+                                For six years Edith had been taking notes on the ducks. This morning one swam over with
+                                a clipboard and asked how she spelled her surname.
                             </Text>
                         </View>
                     </TabPanel>

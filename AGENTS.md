@@ -21,7 +21,18 @@ Resolve Fold components, styles, and design tokens from the published npm packag
 The lockfiles must be sufficient to build from a fresh clone. Never build from a temporary copy.
 
 Never create a Git repository, stage, commit, or push unless the user explicitly requests that Git action.
-Leave implementation changes unstaged and uncommitted for review, including after testing or packaging.
+A request to push an update authorizes staging the release changes, committing them, and pushing to `origin/main`.
+Otherwise, leave implementation changes unstaged and uncommitted for review, including after testing or packaging.
+
+### Pushing an update
+
+1. Bump the app's CalVer to `YYYY.M.N`. Use the release year and month without leading zeros. Start `N` at 1 each
+   month and increment it for every subsequent release that month, including same-day releases.
+2. Set `version` and the ISO `releaseDate` (`YYYY-MM-DD`) in `app/desktop/package.json`. Settings → About reads both
+   fields directly. Match the version in `app/package.json` and the root package entries of both app lockfiles.
+3. Build the app and verify the requested change and the version and release date shown in Settings → About.
+4. Commit the scoped changes with a message that names the actual change. Favor original, dry humor in the spirit of
+   Gary Larson or Douglas Adams when it fits. Push the commit to `origin/main` and verify the remote revision.
 
 ## Coding Ethos
 

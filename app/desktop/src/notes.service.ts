@@ -447,19 +447,14 @@ export class NotesService {
             const id = String(row.key).slice(5)
             versions.set(id, [...(versions.get(id) || []), String(row.id)])
         }
-        const tags = this.allTags()
-        const used = new Set([...membership.values()].flat())
-        for (const id of used) {
-            const parentId = tags.find((tag) => tag.id === id)?.parentId
-            if (parentId) used.add(parentId)
-        }
+
         return {
             privacy: this.privacy(),
             notes: this.db
                 .prepare('SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC')
                 .all()
                 .map((row) => this.note(row, membership.get(String(row.id)) || [], versions.get(String(row.id)) || [])),
-            tags: tags.filter((tag) => used.has(tag.id)),
+            tags: this.allTags(),
         }
     }
 

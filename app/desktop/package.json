@@ -1,7 +1,8 @@
 {
     "name": "blot-desktop",
     "productName": "Blot",
-    "version": "0.1.0",
+    "version": "2026.11.1",
+    "releaseDate": "2026-11-24",
     "license": "MIT",
     "private": true,
     "description": "Local notes with nested tags",

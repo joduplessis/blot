@@ -30,6 +30,19 @@ import { clampReadingFontSize, readReadingFontSize } from '@/helpers/reading-fon
 
 type Checklist = ReturnType<typeof countChecklist>
 
+const listedTags = (tags: Tag[], notes: Note[], filter: string) => {
+    const ids = new Set(notes.flatMap((note) => note.tagIds))
+    const parents = new Map(tags.map((tag) => [tag.id, tag.parentId]))
+
+    ids.add(filter)
+    for (const id of ids) {
+        const parentId = parents.get(id)
+        if (parentId) ids.add(parentId)
+    }
+
+    return tags.filter((tag) => ids.has(tag.id))
+}
+
 const pending = new Map<string, NoteChanges & Partial<Checklist> & { images?: string[] }>()
 const pendingTags = new Set<TagSaveJob>()
 const pendingImports = new Set<Promise<void>>()
@@ -73,7 +86,7 @@ type AppState = {
         exportMarkdown(): Promise<MarkdownExport | null>
         importMarkdown(): Promise<Omit<MarkdownImport, 'snapshot'> | null>
         select(id: string, options?: { toggle?: boolean; range?: boolean; visibleIds?: string[] }): void
-        reconcileSelection(visibleIds: string[]): void
+        reconcileSelection(visibleIds: string[], openTagNoteId?: string): void
         setDraggedNotes(ids: string[]): void
         dropNotes(targetId: string): void
         setFilter(filter: string): void
@@ -136,7 +149,7 @@ export const useAppStore = create<AppState>((set, get) => {
 
         set({
             privacy: snapshot.privacy,
-            tags: snapshot.tags,
+            tags: listedTags(snapshot.tags, notes, get().filter),
             notes,
             selectedId: notes.some((note) => note.id === get().selectedId) ? get().selectedId : '',
             selectedIds: get().selectedIds.filter((id) => ids.has(id)),
@@ -317,18 +330,19 @@ export const useAppStore = create<AppState>((set, get) => {
                     selectionAnchorId: id,
                 })
             },
-            reconcileSelection: (visibleIds) => {
+            reconcileSelection: (visibleIds, openTagNoteId) => {
                 const { selectedId, selectedIds, selectionAnchorId, actions } = get()
-                const ids = selectedIds.filter((id) => visibleIds.includes(id))
+                const canKeep = (id: string) => id === openTagNoteId || visibleIds.includes(id)
+                const ids = selectedIds.filter(canKeep)
 
-                if (!visibleIds.includes(selectedId)) {
+                if (!canKeep(selectedId)) {
                     if (ids.length) set({ selectedId: ids[0], selectedIds: ids, selectionAnchorId: ids[0] })
                     else if (selectedId || visibleIds.length) actions.select(visibleIds[0] || '')
                     return
                 }
 
                 if (ids.length !== selectedIds.length) set({ selectedIds: ids })
-                if (selectionAnchorId && !visibleIds.includes(selectionAnchorId)) set({ selectionAnchorId: selectedId })
+                if (selectionAnchorId && !canKeep(selectionAnchorId)) set({ selectionAnchorId: selectedId })
             },
             setDraggedNotes: (draggedNoteIds) => set({ draggedNoteIds }),
             dropNotes: (targetId) => {
@@ -346,7 +360,15 @@ export const useAppStore = create<AppState>((set, get) => {
                 }
             },
             setFilter: (filter) =>
-                set({ filter, search: '', selectedId: '', selectedIds: [], selectionAnchorId: '', focusMode: false }),
+                set((state) => ({
+                    filter,
+                    tags: listedTags(state.tags, state.notes, filter),
+                    search: '',
+                    selectedId: '',
+                    selectedIds: [],
+                    selectionAnchorId: '',
+                    focusMode: false,
+                })),
             setSearch: (search) => set({ search }),
             setNoteSort: (noteSort) => {
                 if (!isNoteSort(noteSort)) return

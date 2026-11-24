@@ -62,6 +62,7 @@ const NotePanes = () => {
         .sort((a, b) => compareNotes(a, b, noteSort))
     const note = notes.find((note) => note.id === selectedId)
     const visibleIds = visible.map((note) => note.id)
+    const openTagNoteId = tag && !query && note && !note.trashedAt ? note.id : undefined
 
     const selectNote = (id: string, event: MouseEvent | KeyboardEvent) => {
         actions.select(id, { toggle: event.ctrlKey || event.metaKey, range: event.shiftKey, visibleIds })
@@ -80,8 +81,8 @@ const NotePanes = () => {
     }
 
     useEffect(() => {
-        actions.reconcileSelection(visibleIds)
-    }, [selectedId, selectedIds, visibleIds, actions])
+        actions.reconcileSelection(visibleIds, openTagNoteId)
+    }, [selectedId, selectedIds, visibleIds, openTagNoteId, actions])
 
     useEffect(() => () => actions.setDraggedNotes([]), [actions])
 
