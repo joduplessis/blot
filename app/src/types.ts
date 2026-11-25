@@ -62,7 +62,7 @@ export type NotesAPI = {
     syncNow(): Promise<SyncResult>
     onSyncRequest(callback: () => void): () => void
     snapshot(): Promise<Snapshot>
-    createNote(tagIds: string[]): Promise<Note>
+    createNote(tagIds: string[], kind?: 'calendar'): Promise<Note>
     updateNote(id: string, changes: NoteChanges): Promise<Note & { savedVersion?: string }>
     deleteNote(id: string): Promise<void>
     saveTag(tag: Partial<Tag> & { text: string }): Promise<Tag>

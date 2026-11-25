@@ -7,7 +7,7 @@ import { NoteButton } from './note-button'
 import { Tiptap } from './tiptap'
 import type { Note } from '@/types'
 
-export const NoteEditor = ({ note, onDismiss }: { note: Note; onDismiss?: () => void }) => {
+export const NoteEditor = ({ note }: { note: Note }) => {
     const pinSet = useAppStore((state) => state.privacy.pinSet)
     const status = useAppStore((state) => state.status)
     const focusMode = useAppStore((state) => state.focusMode)
@@ -51,10 +51,10 @@ export const NoteEditor = ({ note, onDismiss }: { note: Note; onDismiss?: () => 
                 <NoteButton
                     subtle
                     round={false}
-                    aria-label={onDismiss ? 'Close note' : focusMode ? 'Show sidebar' : 'Focus mode'}
+                    aria-label={focusMode ? 'Show sidebar' : 'Focus mode'}
                     active={focusMode}
-                    onClick={onDismiss || actions.toggleFocus}>
-                    <IconLib icon={onDismiss ? 'x' : 'sidebar'} />
+                    onClick={actions.toggleFocus}>
+                    <IconLib icon="sidebar" />
                 </NoteButton>
                 <Flexer />
                 {pinSet && !note.trashedAt && (

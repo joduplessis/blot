@@ -22,8 +22,8 @@ import {
     renamedPaths,
     renameDocumentHashtags,
 } from '@/helpers/hashtags'
-import { countChecklist } from '@/helpers/checklist'
-import type { ScheduledTask, TaskSchedule } from '@/helpers/task-schedule'
+import { CALENDAR_NOTE_ID, countChecklist, editTaskBody, isCalendarNote } from '@/helpers/checklist'
+import type { TaskSource, TaskSchedule } from '@/helpers/task-schedule'
 import { documentImages } from '@/helpers/note-files'
 import { isNoteSort, readNoteSort, type NoteSort } from '@/helpers/note-sort'
 import { clampReadingFontSize, readReadingFontSize } from '@/helpers/reading-font-size'
@@ -98,7 +98,8 @@ type AppState = {
         createNote(): Promise<void>
         importFile(data: Uint8Array, noteId: string, attachmentName?: string): Promise<string>
         queueFileImport(importing: Promise<void>): void
-        rescheduleTask(noteId: string, body: string, task: ScheduledTask, schedule: TaskSchedule): void
+        createTask(title: string, schedule: TaskSchedule): Promise<void>
+        updateTask(source: TaskSource, schedule: TaskSchedule | null, title?: string): TaskSource | undefined
         updateNote(id: string, changes: NoteChanges): void
         addNoteTag(noteId: string, tagId: string): void
         flush(): Promise<void>
@@ -137,7 +138,7 @@ export const useAppStore = create<AppState>((set, get) => {
             const paths = renamedPaths(before, snapshot.tags)
             for (const [id, changes] of pending) {
                 const note = get().notes.find((note) => note.id === id)
-                if (note) pending.set(id, { ...changes, ...renameDocumentHashtags(note, paths) })
+                if (note && !isCalendarNote(id)) pending.set(id, { ...changes, ...renameDocumentHashtags(note, paths) })
             }
         }
         const ids = new Set(snapshot.notes.map((note) => note.id))
@@ -431,33 +432,65 @@ export const useAppStore = create<AppState>((set, get) => {
                     })
                     .catch(get().actions.setError)
             },
-            rescheduleTask: (noteId, originalBody, task, schedule) => {
+            createTask: async (title, schedule) => {
+                if (!title.trim()) return
+
+                let note = get().notes.find((note) => note.id === CALENDAR_NOTE_ID)
+                if (!note) {
+                    const created = await notesAPI().createNote([], 'calendar')
+                    note = get().notes.find((note) => note.id === CALENDAR_NOTE_ID)
+                    if (!note) {
+                        note = hydrateNotes([created])[0]
+                        set((state) => ({ notes: [...state.notes, note] }))
+                    }
+                }
+
+                const template = document.createElement('template')
+                template.innerHTML = note.body || '<ul data-type="taskList"></ul>'
+                const task = document.createElement('li')
+                task.dataset.type = 'taskItem'
+                task.dataset.checked = 'false'
+                task.dataset.schedule = JSON.stringify({ ...schedule, id: schedule.id || crypto.randomUUID() })
+                task.dataset.dueDate = schedule.start.slice(0, 10)
+                task.innerHTML = '<p>' + escapeHtml(title.trim()) + '</p>'
+                template.content.querySelector('ul').appendChild(task)
+
+                get().actions.updateNote(note.id, { body: template.innerHTML, text: bodyText(template.innerHTML) })
+            },
+            updateTask: ({ noteId, body: originalBody, task }, schedule, title) => {
                 const { notes, actions, locking, privacy } = get()
                 const note = notes.find((note) => note.id === noteId)
                 if (!note || note.trashedAt || (note.encrypted && (locking || !privacy.unlocked))) return
 
-                // An older note acquires a stable schedule ID on its first edit. Never use
-                // a stale position after a sync or paste has rearranged the checklist.
-                const current =
+                // A pasted schedule can share an ID. Only use a position if the body is still the one we opened.
+                const matches = note.scheduledTasks.filter((item) =>
                     note.body === originalBody
-                        ? note.scheduledTasks.find((item) => item.index === task.index)
-                        : task.schedule.id && note.scheduledTasks.find((item) => item.schedule.id === task.schedule.id)
-                if (!current || JSON.stringify(current.schedule) !== JSON.stringify(task.schedule)) {
-                    actions.setError('This task changed. Drag its current calendar entry to reschedule it.')
+                        ? item.index === task.index
+                        : task.schedule.id && item.schedule.id === task.schedule.id
+                )
+                const current = matches.length === 1 && matches[0]
+                if (
+                    !current ||
+                    JSON.stringify(current.schedule) !== JSON.stringify(task.schedule) ||
+                    (title !== undefined && current.text !== task.text)
+                ) {
+                    actions.setError('This task changed. Reopen its calendar entry to edit it.')
                     return
                 }
 
-                const template = document.createElement('template')
-                template.innerHTML = note.body
-                const items = Array.from(template.content.querySelectorAll('li[data-type="taskItem"]')).filter(
-                    (item) => !item.closest('pre, code, script, style')
-                )
-                const item = items[current.index]
-                if (!item) return
+                if (schedule && !schedule.id) schedule = { ...schedule, id: crypto.randomUUID() }
 
-                item.setAttribute('data-schedule', JSON.stringify(schedule))
-                item.setAttribute('data-due-date', schedule.start.slice(0, 10))
-                actions.updateNote(noteId, { body: template.innerHTML })
+                const body = editTaskBody(
+                    note.body,
+                    current.index,
+                    title,
+                    schedule,
+                    !schedule && isCalendarNote(noteId)
+                )
+                actions.updateNote(noteId, { body, text: bodyText(body) })
+
+                if (schedule)
+                    return { noteId, body, task: { index: current.index, text: title ?? current.text, schedule } }
             },
             updateNote: (id, changes) => {
                 const note = get().notes.find((note) => note.id === id)

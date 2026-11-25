@@ -458,13 +458,6 @@
 .f-calendar-days-day__showmore {
     background: var(--f-color-surface);
 }
-.calendar-note-popover > .f-popover__inner {
-    height: 100%;
-    overflow: hidden;
-}
-.calendar-note-popover .note-page {
-    padding: 1.75rem 2rem;
-}
 .f-calendar-days__main {
     width: 100%;
 }

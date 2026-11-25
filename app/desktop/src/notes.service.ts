@@ -7,13 +7,14 @@ import type { Note, NoteChanges, Tag, Snapshot } from '../../src/types'
 import {
     conflictId,
     makeRecord,
+    mergeCalendarTasks,
     noteValue,
     parseRecord,
     type SyncRecord,
     type SyncNote,
     type SyncTag,
 } from './sync-record'
-import { countChecklist } from '../../src/helpers/checklist'
+import { CALENDAR_NOTE_ID, countChecklist, isCalendarNote } from '../../src/helpers/checklist'
 import { documentFiles, documentImages, hasNoteFiles } from '../../src/helpers/note-files'
 import { NoteFilesService } from './note-files.service'
 import {
@@ -458,9 +459,12 @@ export class NotesService {
         }
     }
 
-    createNote(tagIds: string[] = []): Note {
+    createNote(tagIds: string[] = [], kind?: 'calendar'): Note {
         return this.transaction(() => {
-            const id = randomUUID()
+            const id = kind === 'calendar' ? CALENDAR_NOTE_ID : randomUUID()
+            if (kind === 'calendar' && this.db.prepare('SELECT 1 FROM notes WHERE id = ?').get(id))
+                return this.getNote(id)
+
             const now = new Date().toISOString()
             const tags = this.allTags()
             const selected = tags.filter((tag) => tagIds.includes(tag.id))
@@ -486,6 +490,8 @@ export class NotesService {
     }
 
     private syncTags(id: string, title: string, body: string, capture = false) {
+        if (isCalendarNote(id)) return
+
         const tags = this.allTags()
         const ids = documentTagPaths(title, body).map((path) => {
             let parentId: string | null = null
@@ -668,7 +674,7 @@ export class NotesService {
         const paths = renamedPaths(before, this.allTags())
         if (paths.size) {
             for (const row of this.db.prepare('SELECT * FROM notes').all()) {
-                if (row.encrypted) continue
+                if (row.encrypted || isCalendarNote(String(row.id))) continue
 
                 const note = this.note(row, [])
                 const changes = renameDocumentHashtags(note, paths)
@@ -804,6 +810,33 @@ export class NotesService {
         // Deletion wins the original; concurrent content survives in a separate note.
         const winner = heads.find((record) => record.value === null) || heads[0]
         const id = key.slice(5)
+
+        if (isCalendarNote(id) && heads.length > 1 && heads.every((record) => record.value)) {
+            const revisions = heads.map((record) => record.id)
+            const base = this.db
+                .prepare(
+                    `
+                WITH RECURSIVE ancestors(head, id) AS (
+                    SELECT value, value FROM json_each(?)
+                    UNION
+                    SELECT a.head, p.parent FROM ancestors a JOIN sync_parents p ON p.version = a.id
+                ), common(id) AS (
+                    SELECT id FROM ancestors GROUP BY id HAVING COUNT(*) = ?
+                )
+                SELECT payload FROM sync_versions WHERE id IN common
+                AND id NOT IN (SELECT parent FROM sync_parents WHERE version IN common) ORDER BY id LIMIT 1
+            `
+                )
+                .get(JSON.stringify(revisions), heads.length)
+            const original = base && (this.readRecord(String(base.payload)).value as SyncNote)
+            const body = mergeCalendarTasks(original?.body || '', heads)
+
+            if (body !== null) {
+                this.writeNote(id, { ...(winner.value as SyncNote), body }, capture)
+                return
+            }
+        }
+
         const content = (value: SyncRecord['value']) =>
             value &&
             JSON.stringify([

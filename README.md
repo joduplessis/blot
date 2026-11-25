@@ -36,7 +36,7 @@ On Apple Silicon, `npm run pack:mac` leaves Blot at `app/desktop/release/mac-arm
 
 - **File a sighting.** Type `#pond` anywhere in a note to tag it. If the sightings persist, try `#pond/periscopes`. Select a tag in the sidebar to see its notes, or drag a note onto a tag to add it.
 - **Include the evidence.** Use the formatting menu or Markdown shortcuts for headings, lists, checkboxes, links, and code. Paste or drop a photograph into the note. The attachment button takes files, including the witness statement.
-- **Go back on Thursday.** Open the calendar beside a checklist item to set a date, time, or repeat schedule. The task appears in **Calendar** until you check it off.
+- **Go back on Thursday.** Open the calendar beside a checklist item to set a date, time, or repeat schedule. The task appears in **Calendar** until you check it off. Click a calendar task to rename or reschedule it. Choose **New task** to add one directly to the calendar. To finish a standalone task, open its date picker and choose **Complete task**.
 - **Keep the map handy.** Pin a note you use often. Deleted notes go to **Trash**, where you can restore them or delete them permanently.
 
 ## Notes, privacy, and backups

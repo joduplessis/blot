@@ -13,6 +13,7 @@ import {
 } from '@fold-ui/core'
 import { useState, type MouseEvent } from 'react'
 import { useAppStore } from '@/store/app'
+import { isCalendarNote } from '@/helpers/checklist'
 import { NavItem } from './nav-item'
 import { Tags } from './tags'
 import { SettingsModal } from '@/modals/settings.modal'
@@ -28,9 +29,14 @@ export const Nav = () => {
     const [settingsOpen, setSettingsOpen] = useState(false)
     const syncError = useAppStore((state) => state.sync?.error)
     const [width] = useState(() => Number(localStorage.getItem('noted-nav-width')) || 245)
-    const active = notes.filter((note) => !note.trashedAt)
-    const upcoming = active.filter(
-        (note) => note.scheduledTasks.length && (!note.encrypted || (privacy.unlocked && !locking))
+    const listed = notes.filter((note) => !isCalendarNote(note.id))
+    const active = listed.filter((note) => !note.trashedAt)
+    const upcoming = notes.reduce(
+        (count, note) =>
+            note.trashedAt || (note.encrypted && (!privacy.unlocked || locking))
+                ? count
+                : count + note.scheduledTasks.length,
+        0
     )
 
     const toggleLock = () => {
@@ -98,9 +104,9 @@ export const Nav = () => {
                             {[
                                 ['all', 'All notes', 'documents', active.length],
                                 ['pinned', 'Pinned', 'pin', active.filter((note) => note.pinned).length],
-                                ['upcoming', 'Calendar', 'calendar', upcoming.length],
+                                ['upcoming', 'Calendar', 'calendar', upcoming],
                                 ['untagged', 'Untagged', 'tag', active.filter((note) => !note.tagIds.length).length],
-                                ['trash', 'Trash', 'trash', notes.length - active.length],
+                                ['trash', 'Trash', 'trash', listed.length - active.length],
                             ].map(([id, name, icon, count]) => (
                                 <DragElement
                                     key={id}

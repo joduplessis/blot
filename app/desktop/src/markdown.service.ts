@@ -1,3 +1,4 @@
+import { isCalendarNote } from '../../src/helpers/checklist'
 import { mkdir, readFile, realpath, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { Marked } from 'marked'
@@ -113,7 +114,7 @@ export class MarkdownService {
     constructor(private notes: NotesService) {}
 
     async export(parent: string) {
-        const notes = this.notes.snapshot().notes.filter((note) => !note.encrypted)
+        const notes = this.notes.snapshot().notes.filter((note) => !note.encrypted && !isCalendarNote(note.id))
         const base = `Blot-notes-${new Date().toISOString().slice(0, 10)}`
         let directory = path.join(parent, base)
 

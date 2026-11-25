@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto'
+import { parseFragment, serializeOuter } from 'parse5'
 import type { Note } from '../../src/types'
 import { attachmentFilePattern, imageFilePattern } from '../../src/helpers/note-files'
+import { CALENDAR_NOTE_ID, isCalendarNote, taskItems } from '../../src/helpers/checklist'
+import { readSchedule } from '../../src/helpers/task-schedule'
 import { pathKey } from '../../src/helpers/hashtags'
 
 export type SyncNote = Pick<Note, 'title' | 'body' | 'pinned' | 'trashedAt' | 'createdAt' | 'updatedAt'> & {
@@ -33,8 +36,61 @@ export const makeRecord = (key: string, value: SyncRecord['value'], parents: str
     return { ...record, id }
 }
 
-export const conflictId = (record: SyncRecord) =>
-    createHash('sha256').update(`conflict:${record.key}:${record.id}`).digest('hex')
+export const conflictId = (record: SyncRecord) => {
+    const hash = createHash('sha256').update(`conflict:${record.key}:${record.id}`).digest('hex')
+
+    return isCalendarNote(record.key.slice(5)) ? CALENDAR_NOTE_ID + '-' + hash : hash
+}
+
+// A hidden note can hold many unrelated tasks. Compare each item to the shared revision
+// so editing two different tasks offline does not duplicate the entire checklist.
+export const mergeCalendarTasks = (base: string, heads: SyncRecord[]) => {
+    const entries = (body: string) =>
+        taskItems(parseFragment(body)).map((item) => {
+            const attribute = item.attrs.find((attr) => attr.name === 'data-schedule')
+            const schedule = readSchedule(attribute?.value)
+            if (!attribute || !schedule?.id) return null
+
+            return { id: schedule.id, item, attribute, schedule, html: serializeOuter(item) }
+        })
+    const original = new Map<string, string>()
+    const baseEntries = entries(base)
+    type Entry = NonNullable<(typeof baseEntries)[number]>
+    const tasks = new Map<string, Map<string, Entry>>()
+
+    for (const entry of baseEntries) {
+        if (!entry) return null
+
+        original.set(entry.id, entry.html)
+    }
+
+    for (const record of heads) {
+        for (const entry of entries((record.value as SyncNote).body)) {
+            if (!entry) return null
+
+            const variants = tasks.get(entry.id) ?? new Map()
+            variants.set(entry.html, entry)
+            tasks.set(entry.id, variants)
+        }
+    }
+
+    const items: string[] = []
+    for (const [id, variants] of tasks) {
+        const previous = original.get(id)
+        if (variants.size > 1 && previous) variants.delete(previous)
+
+        for (const [index, entry] of [...variants.values()].entries()) {
+            if (index) {
+                // Give a competing edit its own stable identity so both versions remain editable.
+                const copyId = createHash('sha256').update(entry.html).digest('hex')
+                entry.attribute.value = JSON.stringify({ ...entry.schedule, id: copyId })
+            }
+            items.push(serializeOuter(entry.item))
+        }
+    }
+
+    return '<ul data-type="taskList">' + items.join('') + '</ul>'
+}
 
 export const parseRecord = (text: string): SyncRecord => {
     const record = JSON.parse(text)

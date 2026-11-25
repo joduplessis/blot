@@ -23,6 +23,7 @@ import { Resize } from './sidebar.layout'
 import { BlotOctopus } from '@/components/common/blot-octopus'
 import { NoteSortMenu } from '@/components/note-sort-menu'
 import { NoteMenu } from '@/menus/note.menu'
+import { isCalendarNote } from '@/helpers/checklist'
 import { compareNotes } from '@/helpers/note-sort'
 import { escapeHtml } from '@/helpers/hashtags'
 import type { Note } from '@/types'
@@ -48,6 +49,7 @@ const NotePanes = () => {
     const query = search.trim().toLowerCase()
     const visible = notes
         .filter((note) => {
+            if (isCalendarNote(note.id)) return false
             if (filter === 'trash' ? !note.trashedAt : !!note.trashedAt) return false
             if (filter === 'pinned' && !note.pinned) return false
             if (filter === 'untagged' && note.tagIds.length) return false

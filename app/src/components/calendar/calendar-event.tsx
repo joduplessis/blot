@@ -1,13 +1,10 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useWindowEvent } from '@fold-ui/core'
 import { addDays, differenceInCalendarDays, startOfDay } from 'date-fns'
-import { scheduleDate, type ScheduledTask } from '@/helpers/task-schedule'
+import { scheduleDate, type TaskSource } from '@/helpers/task-schedule'
 
-export type CalendarEvent = {
+export type CalendarEvent = TaskSource & {
     id: string
-    noteId: string
-    body: string
-    task: ScheduledTask
     title: string
     start: Date
     end: Date

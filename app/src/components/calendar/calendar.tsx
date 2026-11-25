@@ -8,14 +8,14 @@ import {
     startOfMonth,
     startOfWeek,
 } from 'date-fns'
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useAppStore } from '@/store/app'
 import { movedSchedule, scheduleOccurrences } from '@/helpers/task-schedule'
-import { NoteEditor } from '../note-editor'
+import { isCalendarNote } from '@/helpers/checklist'
 import { CalendarDays } from './calendar-days'
 import { CalendarSchedule } from './calendar-schedule'
 import { useCalendarDrag, type CalendarEvent } from './calendar-event'
-import { AnchoredPopover } from '../common/anchored-popover'
+import { CalendarTaskPopover } from './calendar-task-popover'
 
 const useCalendarScroll = (date: Date, view: number, setDate: (date: Date) => void) => {
     const scrollRef = useRef<HTMLDivElement>(null)
@@ -80,9 +80,8 @@ const useCalendarScroll = (date: Date, view: number, setDate: (date: Date) => vo
 export const Calendar = () => {
     const notes = useAppStore((state) => state.notes)
     const unlocked = useAppStore((state) => state.privacy.unlocked && !state.locking)
-    const selectedId = useAppStore((state) => state.selectedId)
     const actions = useAppStore((state) => state.actions)
-    const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null)
+    const [editor, setEditor] = useState<{ target: HTMLButtonElement; event?: CalendarEvent } | null>(null)
     const [date, setDate] = useState(() => startOfDay(new Date()))
     const [view, setView] = useState(2)
     const month = view === 2
@@ -101,7 +100,9 @@ export const Calendar = () => {
                         noteId: note.id,
                         body: note.body,
                         task,
-                        title: task.text ? task.text + ' · ' + title : title,
+                        title: isCalendarNote(note.id)
+                            ? task.text.trim() || 'Untitled task'
+                            : [task.text.trim(), title].filter(Boolean).join(' · '),
                         wholeDay: task.schedule.wholeDay,
                         ...range,
                     })
@@ -110,7 +111,9 @@ export const Calendar = () => {
         }
         return result
     }, [notes, days, unlocked])
-    const note = notes.find((note) => note.id === selectedId && !note.trashedAt && (!note.encrypted || unlocked))
+    const editable =
+        !editor?.event ||
+        notes.some((note) => note.id === editor.event.noteId && !note.trashedAt && (!note.encrypted || unlocked))
     const drag = useCalendarDrag((event, preview, resized) => {
         const schedule = movedSchedule(
             event.task.schedule,
@@ -120,7 +123,7 @@ export const Calendar = () => {
             preview.wholeDay,
             resized
         )
-        actions.rescheduleTask(event.noteId, event.body, event.task, schedule)
+        actions.updateTask(event, schedule)
     })
     const displayed = useMemo(
         () => (drag.preview ? events.map((event) => (event.id === drag.preview.id ? drag.preview : event)) : events),
@@ -146,10 +149,13 @@ export const Calendar = () => {
         'onClick': (e) => {
             if (e.detail && drag.suppressClick.current) return
             e.currentTarget.id ||= 'calendar-entry-' + crypto.randomUUID()
-            setAnchor(e.currentTarget)
-            actions.select(event.noteId)
+            setEditor({ target: e.currentTarget, event })
         },
     })
+
+    useEffect(() => {
+        if (!editable) setEditor(null)
+    }, [editable])
 
     const weekdays = (
         <View
@@ -189,6 +195,12 @@ export const Calendar = () => {
                 className="calendar-heading">
                 <Heading as="h5">{heading}</Heading>
                 <Flexer />
+                <Button
+                    id="calendar-new-task"
+                    size="sm"
+                    onClick={(e) => setEditor({ target: e.currentTarget })}>
+                    New task
+                </Button>
                 <ButtonGroup>
                     <Button
                         size="sm"
@@ -279,23 +291,13 @@ export const Calendar = () => {
                     </View>
                 )}
             </View>
-            {note && anchor && (
-                <AnchoredPopover
-                    target={anchor}
-                    role="dialog"
-                    aria-label="Edit calendar note"
-                    width="min(640px, 82vw)"
-                    height="min(510px, 72vh)"
-                    className="calendar-note-popover"
-                    ignoreContainers={['task-schedule-popover']}
-                    onDismiss={() => actions.select('')}
-                    content={
-                        <NoteEditor
-                            key={note.id}
-                            note={note}
-                            onDismiss={() => actions.select('')}
-                        />
-                    }
+            {editor && editable && (
+                <CalendarTaskPopover
+                    key={editor.target.id}
+                    target={editor.target}
+                    event={editor.event}
+                    date={date}
+                    onDismiss={() => setEditor(null)}
                 />
             )}
         </View>

@@ -1,14 +1,15 @@
 import { Popover, Portal, type PopoverProps } from '@fold-ui/core'
 import { autoUpdate } from '@floating-ui/dom'
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useState, type RefObject } from 'react'
 
 // Keep the editor open at its last anchor when an edit moves the calendar entry.
 export const AnchoredPopover = ({
     target,
     initialRect,
+    initialFocus,
     onDismiss,
     ...props
-}: PopoverProps & { target: HTMLElement; initialRect?: DOMRect }) => {
+}: PopoverProps & { target: HTMLElement; initialRect?: DOMRect; initialFocus?: RefObject<HTMLElement> }) => {
     const [panel, setPanel] = useState<HTMLElement | null>(null)
     const [position, setPosition] = useState(() => ({
         left: target.getBoundingClientRect().left,
@@ -18,7 +19,8 @@ export const AnchoredPopover = ({
     useLayoutEffect(() => {
         if (!panel) return
 
-        panel.focus({ preventScroll: true })
+        const focusTarget = initialFocus?.current || panel
+        focusTarget.focus({ preventScroll: true })
         let rect = initialRect || target.getBoundingClientRect()
         return autoUpdate(target, panel, () => {
             if (target.isConnected) rect = target.getBoundingClientRect()
@@ -33,7 +35,7 @@ export const AnchoredPopover = ({
 
             setPosition((last) => (last.left === left && last.top === top ? last : { left, top }))
         })
-    }, [target, panel, initialRect])
+    }, [target, panel, initialRect, initialFocus])
 
     return (
         <Popover

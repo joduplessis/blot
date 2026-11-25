@@ -36,6 +36,7 @@ import { repeatRule, scheduleDate, scheduleStamp, type TaskSchedule } from '@/he
 import { Repeat, defaultWeekdays as weekdays } from './repeat'
 
 type DateSelectProps = {
+    clearLabel?: string | null
     schedule: TaskSchedule | null
     onSave: (schedule: TaskSchedule | null) => void
     onCancel: () => void
@@ -98,7 +99,7 @@ const TimeField = ({ label, value, disabled, onChange }) => (
     </>
 )
 
-export const DateSelect = ({ schedule, onSave, onCancel }: DateSelectProps) => {
+export const DateSelect = ({ schedule, onSave, onCancel, clearLabel = 'Clear' }: DateSelectProps) => {
     const { visible, show, hide } = useVisibility(false)
     const propStart = schedule ? scheduleDate(schedule.start) : undefined
     const propEnd = schedule?.end ? scheduleDate(schedule.end) : undefined
@@ -367,11 +368,13 @@ export const DateSelect = ({ schedule, onSave, onCancel }: DateSelectProps) => {
 
                 <div style={{ flex: 1 }} />
 
-                <Button
-                    subtle
-                    onClick={() => onSave(null)}>
-                    Clear
-                </Button>
+                {clearLabel && (
+                    <Button
+                        subtle
+                        onClick={() => onSave(null)}>
+                        {clearLabel}
+                    </Button>
+                )}
 
                 <Button onClick={onCancel}>Cancel</Button>
 

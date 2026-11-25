@@ -23,6 +23,12 @@ export type ScheduledTask = {
     schedule: TaskSchedule
 }
 
+export type TaskSource = {
+    noteId: string
+    body: string
+    task: ScheduledTask
+}
+
 const frequencies = {
     day: RRule.DAILY,
     week: RRule.WEEKLY,
